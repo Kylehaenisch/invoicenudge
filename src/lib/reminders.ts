@@ -29,24 +29,24 @@ export function getDueReminders(
   alreadySent: Set<ReminderKey>,
   today: string,
 ): DueReminder[] {
-  // TODO(human): implement the due-reminder decision.
-  //
-  // For each template, its target date is:
-  //   addDaysToDateOnly(invoice.due_date, template.offset_days)
-  // (offset_days is negative for "before due", 0 on the due date, positive after.)
-  //
-  // Design questions to settle:
-  //   1. Skip anything already in `alreadySent` — that part's non-negotiable
-  //      (it's what stops duplicate emails).
-  //   2. Fire only when target date === today, or also "catch up" on any
-  //      target date <= today that hasn't been sent? Exact-match is simpler
-  //      but silently skips a reminder if the cron didn't run on the right
-  //      day (a failed deploy, Vercel outage, etc). Catch-up guarantees
-  //      nothing is missed, but could send several reminders at once for an
-  //      invoice that hasn't been checked in a while.
-  //   3. Return `scheduledFor` as the template's *computed target date*
-  //      (not `today`) — reminder_log and the invoice detail page's history
-  //      both show this value, and it should reflect what the reminder was
-  //      for, not when the cron happened to run.
-  return [];
+const due: DueReminder[] = [];
+
+  for (const template of templates) {
+      if (alreadySent.has(template.key)) {
+          continue;
+         }
+
+    const scheduledFor = addDaysToDateOnly(invoice.due_date, template.offset_days);
+
+    if (scheduledFor <= today
+        ) {
+         due.push({ templateKey: template.key, scheduledFor });
+       }
+    }
+
+  return due;
+
+
+  
+  
 }
