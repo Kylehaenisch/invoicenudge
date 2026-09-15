@@ -101,12 +101,19 @@ export async function GET(request: NextRequest) {
         };
 
         try {
-          await resend.emails.send({
+          // The Resend SDK does NOT throw on an API-level rejection (bad
+          // "from" domain, invalid recipient, etc.) — it resolves normally
+          // with `{ data: null, error: {...} }`. Ignoring that `error` field
+          // was a real bug here: a rejected send would fall through and get
+          // logged as "sent" anyway. Throwing makes it hit the catch below
+          // like any other failure.
+          const { error: sendError } = await resend.emails.send({
             from: fromAddress,
             to: invoice.client.email,
             subject: renderTemplate(template.subject, ctx),
             text: renderTemplate(template.body, ctx),
           });
+          if (sendError) throw new Error(sendError.message);
 
           // The unique (invoice_id, template_key) constraint on
           // reminder_log is the real dedup guarantee if this route is ever

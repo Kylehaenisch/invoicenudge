@@ -56,9 +56,13 @@ which creates a pre-confirmed demo account either way.
 
 ### 3. Create a Resend account
 
-At [resend.com](https://resend.com), grab an API key. For real sending
-you'll need a verified domain; for local testing Resend's sandbox works
-without one (emails only deliver to your own verified address).
+At [resend.com](https://resend.com), grab an API key. For local testing,
+`.env.example`'s default `REMINDER_FROM_EMAIL` (`onboarding@resend.dev`) works
+immediately with no domain setup — but Resend will only *deliver* to the
+email address you signed up to Resend with (anything else silently fails,
+or in newer accounts gets rejected outright). For real sending to real
+clients, verify your own domain at [resend.com/domains](https://resend.com/domains)
+and switch `REMINDER_FROM_EMAIL` to an address on it.
 
 ### 4. Create a Stripe account
 
