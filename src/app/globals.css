@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #faf8f4;
+  --color-surface: #ffffff;
+  --color-ink: #241f1c;
+  --color-ink-muted: #6b6259;
+  --color-border: #e8e1d9;
+  --color-accent: #b54e27;
+  --color-accent-dark: #93401f;
+  --color-accent-soft: #f6e9e0;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-surface: var(--color-surface);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-dark: var(--color-accent-dark);
+  --color-accent-soft: var(--color-accent-soft);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-fraunces);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* A quiet grain texture keeps large paper-colored areas from feeling like a
+   flat default template — subtle at normal viewing distance. */
+.bg-grain {
+  background-image: radial-gradient(
+    var(--color-ink) 0.5px,
+    transparent 0.5px
+  );
+  background-size: 14px 14px;
+  opacity: 0.04;
+}
