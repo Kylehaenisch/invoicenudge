@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessLevel } from "@/lib/subscription";
 
 export type ClientActionState = { error?: string; ok?: boolean };
 
@@ -23,6 +24,15 @@ export async function createClientRecord(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_status, current_period_end")
+    .eq("id", user.id)
+    .single();
+  if (profile && getAccessLevel(profile) !== "full") {
+    return { error: "Your subscription isn't active — reactivate billing to add clients." };
+  }
 
   const { error } = await supabase.from("clients").insert({
     user_id: user.id,

@@ -62,9 +62,20 @@ async function main() {
   // The on_auth_user_created trigger (0001_init.sql) already created the
   // profile row + 4 default reminder templates. Just make sure the business
   // name is set even if this user already existed from a previous run.
+  //
+  // Also give the demo account a fake "active" subscription — it predates
+  // billing and has no real Stripe customer, but should still demo the
+  // full app rather than show up read-only (see lib/subscription.ts).
+  const oneYearFromNow = new Date(
+    Date.now() + 365 * 24 * 60 * 60 * 1000,
+  ).toISOString();
   await supabase
     .from("profiles")
-    .update({ business_name: SEED_BUSINESS_NAME })
+    .update({
+      business_name: SEED_BUSINESS_NAME,
+      subscription_status: "active",
+      current_period_end: oneYearFromNow,
+    })
     .eq("id", userId);
 
   // Wipe previous demo clients/invoices so this script is safely re-runnable

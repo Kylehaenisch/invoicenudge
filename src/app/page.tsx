@@ -67,6 +67,25 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+        <Card className="mx-auto max-w-sm p-8 text-center">
+          <h2 className="font-serif text-lg text-ink">Simple pricing</h2>
+          <p className="mt-3">
+            <span className="font-serif text-4xl text-ink">$15</span>
+            <span className="text-sm text-ink-muted">/month</span>
+          </p>
+          <p className="mt-2 text-sm text-ink-muted">
+            Unlimited clients and invoices. 14-day free trial, cancel
+            anytime.
+          </p>
+          <Link href="/signup" className="mt-6 block">
+            <Button size="md" className="w-full">
+              Start free trial
+            </Button>
+          </Link>
+        </Card>
+      </section>
+
       <footer className="border-t border-border px-4 py-8 text-center text-xs text-ink-muted sm:px-6">
         InvoiceNudge — built for freelance photographers.
       </footer>

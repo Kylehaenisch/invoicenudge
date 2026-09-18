@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import { getAccessLevel } from "@/lib/subscription";
 
 export default async function DashboardLayout({
   children,
@@ -21,9 +22,11 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("business_name, email")
+    .select("business_name, email, subscription_status, current_period_end")
     .eq("id", user.id)
     .single();
+
+  const accessLevel = profile ? getAccessLevel(profile) : "full";
 
   return (
     <div className="min-h-screen bg-paper">
@@ -49,6 +52,15 @@ export default async function DashboardLayout({
           </div>
         </div>
       </header>
+      {accessLevel === "read_only" && (
+        <div className="border-b border-rose-200 bg-rose-50 px-4 py-3 text-center text-sm text-rose-700 sm:px-6">
+          Your subscription isn&apos;t active — you can view existing data,
+          but creating invoices/clients and sending reminders is paused.{" "}
+          <Link href="/settings/billing" className="font-medium underline">
+            Reactivate billing
+          </Link>
+        </div>
+      )}
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</main>
     </div>
   );

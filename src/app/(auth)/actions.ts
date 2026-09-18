@@ -37,7 +37,10 @@ export async function signUp(
     };
   }
 
-  redirect("/dashboard");
+  // New accounts go straight into Stripe Checkout to start their trial —
+  // see app/api/subscribe/checkout/route.ts. If they abandon it, they land
+  // back on the dashboard with a "subscribe" banner rather than being stuck.
+  redirect("/api/subscribe/checkout");
 }
 
 export async function signIn(

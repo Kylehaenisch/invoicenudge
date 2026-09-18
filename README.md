@@ -10,15 +10,24 @@ until you mark it paid.
 
 ## Status: needs one piece before it runs
 
-[`src/lib/reminders.ts`](src/lib/reminders.ts) has a `TODO(human)` — the
-function that decides which reminders are due on a given day. Everything
-else (schema, auth, dashboard, invoices, templates, Stripe, the cron route
-that calls this function) is built and compiles. Fill that in first; see the
-comment in the file for the design questions it needs to answer.
+[`src/lib/subscription.ts`](src/lib/subscription.ts) has a `TODO(human)` —
+the function that decides a user's access level (`full` vs `read_only`)
+from their subscription state. It defaults to always returning `"full"` so
+nothing is blocked until it's filled in; see the comment in the file for the
+design questions it needs to answer. Everything else — the $15/mo
+subscription Checkout/trial, Stripe Customer Portal, webhook, and every
+place that calls this function — is built and compiles.
+
+(Earlier, [`src/lib/reminders.ts`](src/lib/reminders.ts) had the same kind
+of `TODO(human)` for deciding which reminders are due — that one's done.)
 
 ## Data model
 
-- **profiles** — one per photographer, auto-created on signup
+- **profiles** — one per photographer, auto-created on signup. Also holds
+  their InvoiceNudge subscription state (`stripe_customer_id`,
+  `stripe_subscription_id`, `subscription_status`, `current_period_end`) —
+  this is you charging *them*, separate from the per-invoice Stripe
+  Checkout below.
 - **clients** — name, email, business name
 - **invoices** — client, amount, description, dates, status
   (`draft`/`sent`/`paid`/`overdue`), a `public_token` for the client-facing
@@ -30,7 +39,8 @@ comment in the file for the design questions it needs to answer.
   history
 
 Full schema, indexes, and Row Level Security policies:
-[`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql).
+[`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) and
+[`0002_subscriptions.sql`](supabase/migrations/0002_subscriptions.sql).
 
 ## Local setup
 
@@ -120,6 +130,43 @@ curl http://localhost:3000/api/cron/send-reminders
 
 (No `Authorization` header needed locally unless you've set `CRON_SECRET`
 in `.env.local`.) It'll report how many reminders it sent as JSON.
+
+## Selling InvoiceNudge itself as a subscription
+
+There are two entirely separate Stripe integrations in this app — don't mix
+them up:
+
+1. **Per-invoice payments** (`app/api/public/invoices/[token]/checkout`) —
+   your users' *clients* paying an invoice. Built in v1.
+2. **The InvoiceNudge subscription** (`app/api/subscribe/*`) — your users
+   paying *you* $15/month, with a 14-day trial. This is what makes it a
+   product you can sell.
+
+To set (2) up yourself (or a fresh Stripe account):
+
+1. Create the recurring price: `stripe prices create --unit-amount 1500
+   --currency usd -d "recurring[interval]=month" -d
+   "product_data[name]=InvoiceNudge Subscription"` (or in the dashboard:
+   Product catalog → Add product → Recurring, monthly, $15). Put the
+   resulting price ID in `STRIPE_SUBSCRIPTION_PRICE_ID`.
+2. Make sure your webhook endpoint (local `stripe listen` or the production
+   one in the Stripe dashboard) is subscribed to `checkout.session.completed`,
+   `customer.subscription.updated`, and `customer.subscription.deleted` — the
+   first migration's webhook only needed the first event; this one needs all
+   three.
+3. New signups are sent straight into subscription Checkout
+   (`app/(auth)/actions.ts`) to start their trial. Existing users can
+   (re)subscribe or manage billing from **Settings → Billing**, which links
+   to `/api/subscribe/checkout` and Stripe's Customer Portal
+   (`/api/subscribe/portal`).
+4. **Going live for real** is entirely a Stripe-side step I can't do for
+   you: activate your Stripe account (identity + business verification,
+   bank account for payouts) in the dashboard, then swap the test-mode keys
+   in your env vars for live-mode ones. No code changes needed.
+5. Before charging real customers, add real **Terms of Service** and
+   **Privacy Policy** pages — Stripe requires these to be linked for live
+   subscription billing, and a generic placeholder isn't a substitute for
+   actual legal review.
 
 ## Deploying to Vercel
 

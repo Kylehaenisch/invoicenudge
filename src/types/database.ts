@@ -18,11 +18,26 @@ export type ReminderKey =
   | "after_due_14";
 export type ReminderLogStatus = "sent" | "failed" | "skipped";
 
+// Stripe's own subscription statuses — not re-derived, stored verbatim.
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid"
+  | "incomplete"
+  | "incomplete_expired"
+  | "paused";
+
 export type Profile = {
   id: string;
   email: string;
   business_name: string;
   created_at: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: SubscriptionStatus | null;
+  current_period_end: string | null;
 };
 
 export type Client = {

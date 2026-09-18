@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getFromAddress, getResendClient } from "@/lib/resend";
 import { renderTemplate } from "@/lib/merge-fields";
 import { getDueReminders } from "@/lib/reminders";
+import { getAccessLevel } from "@/lib/subscription";
 import { todayDateOnly } from "@/lib/format";
 import type {
   Client,
@@ -75,6 +76,14 @@ export async function GET(request: NextRequest) {
             .eq("invoice_id", invoice.id),
           supabase.from("profiles").select("*").eq("id", invoice.user_id).single(),
         ]);
+
+      // A lapsed subscription pauses the whole *service* you're selling —
+      // this is the enforcement point that actually matters, more than any
+      // button in the UI: no reminders go out on behalf of an account
+      // that isn't paying.
+      if (profile && getAccessLevel(profile) !== "full") {
+        continue;
+      }
 
       const alreadySent = new Set(
         (existingLog ?? []).map((l) => l.template_key as ReminderKey),

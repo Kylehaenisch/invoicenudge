@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/clients", label: "Clients" },
   { href: "/invoices", label: "Invoices" },
   { href: "/settings/templates", label: "Reminder templates" },
+  { href: "/settings/billing", label: "Billing" },
 ];
 
 export function DashboardNav() {

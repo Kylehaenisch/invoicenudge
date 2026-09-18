@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessLevel } from "@/lib/subscription";
 
 export type InvoiceFormState = { error?: string };
 
@@ -35,6 +36,15 @@ export async function createInvoice(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_status, current_period_end")
+    .eq("id", user.id)
+    .single();
+  if (profile && getAccessLevel(profile) !== "full") {
+    return { error: "Your subscription isn't active — reactivate billing to create invoices." };
+  }
 
   const { data: invoice, error } = await supabase
     .from("invoices")
