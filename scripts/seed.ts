@@ -17,7 +17,7 @@ import type { Database } from "../src/types/database";
 const SEED_EMAIL = process.env.SEED_EMAIL ?? "demo@invoicenudge.test";
 const SEED_PASSWORD = process.env.SEED_PASSWORD ?? "demo12345";
 const SEED_BUSINESS_NAME =
-  process.env.SEED_BUSINESS_NAME ?? "Kyle Haenisch Photography";
+  process.env.SEED_BUSINESS_NAME ?? "John Doe Photography";
 
 function addDays(days: number): string {
   const d = new Date();

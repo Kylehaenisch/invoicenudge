@@ -29,7 +29,7 @@ export default function SignupPage() {
             <Input
               id="business_name"
               name="business_name"
-              placeholder="e.g. Kyle Haenisch Photography"
+              placeholder="e.g. John Doe Photography"
               autoComplete="organization"
             />
           </div>
