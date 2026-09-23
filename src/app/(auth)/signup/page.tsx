@@ -55,6 +55,26 @@ export default function SignupPage() {
             />
             <p className="mt-1 text-xs text-ink-muted">At least 8 characters.</p>
           </div>
+          <label className="flex items-start gap-2 text-sm text-ink-muted">
+            <input
+              type="checkbox"
+              name="terms_accepted"
+              required
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-accent"
+            />
+            <span>
+              I agree to InvoiceNudge&apos;s{" "}
+              <Link href="/terms" className="text-accent hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-accent hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </label>
+
           {state?.error && (
             <p className="text-sm text-rose-600">{state.error}</p>
           )}
@@ -64,17 +84,6 @@ export default function SignupPage() {
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Creating account…" : "Start free trial"}
           </Button>
-          <p className="text-center text-xs text-ink-muted">
-            By signing up, you agree to InvoiceNudge&apos;s{" "}
-            <Link href="/terms" className="text-accent hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-accent hover:underline">
-              Privacy Policy
-            </Link>
-            .
-          </p>
         </form>
         <p className="mt-4 text-center text-sm text-ink-muted">
           Already have an account?{" "}

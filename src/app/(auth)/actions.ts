@@ -12,12 +12,20 @@ export async function signUp(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const businessName = String(formData.get("business_name") ?? "").trim();
+  const termsAccepted = formData.get("terms_accepted") === "on";
 
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
+  }
+  // The checkbox is `required` in the HTML too, but that only stops a
+  // regular browser submission — anyone posting to this action directly
+  // could skip it, so the actual consent record has to be enforced here,
+  // server-side, not just trusted from the client.
+  if (!termsAccepted) {
+    return { error: "You must agree to the Terms of Service and Privacy Policy." };
   }
 
   const supabase = await createClient();
