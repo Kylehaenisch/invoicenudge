@@ -62,8 +62,19 @@ export default function SignupPage() {
             <p className="text-sm text-emerald-700">{state.message}</p>
           )}
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Creating account…" : "Sign up"}
+            {pending ? "Creating account…" : "Start free trial"}
           </Button>
+          <p className="text-center text-xs text-ink-muted">
+            By signing up, you agree to InvoiceNudge&apos;s{" "}
+            <Link href="/terms" className="text-accent hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-accent hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
         <p className="mt-4 text-center text-sm text-ink-muted">
           Already have an account?{" "}

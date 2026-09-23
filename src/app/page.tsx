@@ -87,7 +87,16 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-border px-4 py-8 text-center text-xs text-ink-muted sm:px-6">
-        InvoiceNudge — built for freelance photographers.
+        <p>InvoiceNudge — built for freelance photographers.</p>
+        <p className="mt-2">
+          <Link href="/terms" className="hover:text-ink hover:underline">
+            Terms of Service
+          </Link>
+          {" · "}
+          <Link href="/privacy" className="hover:text-ink hover:underline">
+            Privacy Policy
+          </Link>
+        </p>
       </footer>
     </div>
   );
