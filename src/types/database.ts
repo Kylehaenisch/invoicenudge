@@ -12,6 +12,7 @@
 
 export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue";
 export type ReminderKey =
+  | "on_send"
   | "before_due_3"
   | "due_date"
   | "after_due_7"
