@@ -32,7 +32,17 @@ export async function signUp(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { business_name: businessName } },
+    options: {
+      data: { business_name: businessName },
+      // Without this, Supabase falls back to the project's "Site URL"
+      // dashboard setting to build the confirmation link — which defaults
+      // to localhost from initial local setup and has to be updated
+      // manually per environment. Being explicit here means it's always
+      // correct regardless of what that setting is left at. Supabase also
+      // requires this exact URL (or a pattern matching it) to be in the
+      // project's Redirect URLs allow-list, or it's silently ignored.
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+    },
   });
 
   if (error) return { error: error.message };
