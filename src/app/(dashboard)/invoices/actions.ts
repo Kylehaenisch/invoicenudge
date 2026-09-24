@@ -64,7 +64,7 @@ export async function createInvoice(
   if (error || !invoice) return { error: error?.message ?? "Could not create invoice." };
 
   if (status === "sent") {
-    await sendInvoiceCreatedNotification(supabase, invoice.id, user.id);
+    await sendInvoiceCreatedNotification(invoice.id, user.id);
   }
 
   revalidatePath("/invoices");
@@ -108,7 +108,7 @@ export async function markInvoiceSent(formData: FormData) {
     .eq("user_id", user.id)
     .eq("status", "draft");
 
-  await sendInvoiceCreatedNotification(supabase, id, user.id);
+  await sendInvoiceCreatedNotification(id, user.id);
 
   revalidatePath(`/invoices/${id}`);
   revalidatePath("/invoices");

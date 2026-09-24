@@ -1,5 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, InvoiceWithClient } from "@/types/database";
+import type { InvoiceWithClient } from "@/types/database";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getResendClient, getFromAddress } from "@/lib/resend";
 import { renderTemplate } from "@/lib/merge-fields";
 import { getAccessLevel } from "@/lib/subscription";
@@ -11,16 +11,27 @@ import { todayDateOnly } from "@/lib/format";
  * actions, not the daily cron (that only handles the 4 due-date-relative
  * reminders — see lib/reminders.ts).
  *
+ * Uses the service-role client, not the caller's RLS-scoped session client —
+ * `reminder_log` only has a SELECT policy for owners (see 0001_init.sql:
+ * "only the service-role key ... is ever allowed to write reminder_log
+ * rows"). The first version of this function took the session client as a
+ * parameter and every insert here was silently rejected by that policy: the
+ * email sent successfully, but nothing ever showed up in reminder_log or
+ * the invoice's history. `invoiceId`/`userId` are already validated by the
+ * caller (a signed-in server action), so bypassing RLS here is intentional,
+ * the same way the cron does.
+ *
  * Never throws: a failed or skipped send should never block the invoice
  * action that triggered it. Failures are logged to reminder_log the same
  * way the cron logs a failed reminder, so they're still visible on the
  * invoice's history.
  */
 export async function sendInvoiceCreatedNotification(
-  supabase: SupabaseClient<Database>,
   invoiceId: string,
   userId: string,
 ): Promise<void> {
+  const supabase = createAdminClient();
+
   try {
     // Already sent (or already attempted)? Don't send again — this also
     // protects against createInvoice/markInvoiceSent somehow running twice
@@ -59,6 +70,7 @@ export async function sendInvoiceCreatedNotification(
       .from("invoices")
       .select("*, client:clients(*)")
       .eq("id", invoiceId)
+      .eq("user_id", userId)
       .single();
     const invoiceRaw = invoiceDataRaw as InvoiceWithClient | null;
     if (!invoiceRaw) return;
