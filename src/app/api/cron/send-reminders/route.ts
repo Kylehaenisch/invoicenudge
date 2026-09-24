@@ -69,7 +69,11 @@ export async function GET(request: NextRequest) {
             .from("reminder_templates")
             .select("*")
             .eq("user_id", invoice.user_id)
-            .eq("enabled", true),
+            .eq("enabled", true)
+            // 'on_send' fires immediately from the create/mark-sent server
+            // actions, not on this due-date-offset schedule — see
+            // lib/send-invoice-notification.ts.
+            .neq("key", "on_send"),
           supabase
             .from("reminder_log")
             .select("template_key")

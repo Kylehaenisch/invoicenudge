@@ -1,0 +1,13 @@
+-- Adds a new reminder_key value for the immediate "invoice sent" email,
+-- distinct from the 4 due-date-relative reminders (before_due_3, due_date,
+-- after_due_7, after_due_14), which stay on the daily cron schedule in
+-- lib/reminders.ts. This new one fires once, immediately, from the
+-- create/mark-sent server actions themselves — see
+-- lib/send-invoice-notification.ts.
+--
+-- Postgres requires ALTER TYPE ... ADD VALUE to be committed before the new
+-- value can be referenced (e.g. in an INSERT) in the same session. Run this
+-- file on its own, then run 0004_on_send_seed.sql as a SEPARATE query in
+-- the SQL Editor — pasting both into one query and running once will fail
+-- with "unsafe use of new value of enum type".
+alter type public.reminder_key add value 'on_send';

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAccessLevel } from "@/lib/subscription";
+import { sendInvoiceCreatedNotification } from "@/lib/send-invoice-notification";
 
 export type InvoiceFormState = { error?: string };
 
@@ -62,6 +63,10 @@ export async function createInvoice(
 
   if (error || !invoice) return { error: error?.message ?? "Could not create invoice." };
 
+  if (status === "sent") {
+    await sendInvoiceCreatedNotification(supabase, invoice.id, user.id);
+  }
+
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
   redirect(`/invoices/${invoice.id}`);
@@ -102,6 +107,8 @@ export async function markInvoiceSent(formData: FormData) {
     .eq("id", id)
     .eq("user_id", user.id)
     .eq("status", "draft");
+
+  await sendInvoiceCreatedNotification(supabase, id, user.id);
 
   revalidatePath(`/invoices/${id}`);
   revalidatePath("/invoices");
