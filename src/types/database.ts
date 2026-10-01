@@ -39,6 +39,7 @@ export type Profile = {
   stripe_subscription_id: string | null;
   subscription_status: SubscriptionStatus | null;
   current_period_end: string | null;
+  trial_ending_notified_at: string | null;
 };
 
 export type Client = {
