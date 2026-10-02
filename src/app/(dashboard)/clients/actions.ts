@@ -4,8 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAccessLevel } from "@/lib/subscription";
-
-export type ClientActionState = { error?: string; ok?: boolean };
+export type ClientActionState = {
+  error?: string;
+  ok?: boolean;
+  // Echoed back so the form can re-fill itself after a failed submit,
+  // instead of losing everything the user typed over one bad field.
+  values?: { name?: string; email?: string; business_name?: string };
+};
 
 export async function createClientRecord(
   _prevState: ClientActionState,
@@ -14,9 +19,10 @@ export async function createClientRecord(
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const businessName = String(formData.get("business_name") ?? "").trim();
+  const values = { name, email, business_name: businessName };
 
   if (!name || !email) {
-    return { error: "Name and email are required." };
+    return { error: "Name and email are required.", values };
   }
 
   const supabase = await createClient();
@@ -31,7 +37,10 @@ export async function createClientRecord(
     .eq("id", user.id)
     .single();
   if (profile && getAccessLevel(profile) !== "full") {
-    return { error: "Your subscription isn't active — reactivate billing to add clients." };
+    return {
+      error: "Your subscription isn't active — reactivate billing to add clients.",
+      values,
+    };
   }
 
   const { error } = await supabase.from("clients").insert({
@@ -41,7 +50,7 @@ export async function createClientRecord(
     business_name: businessName,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: error.message, values };
 
   revalidatePath("/clients");
   return { ok: true };

@@ -31,6 +31,7 @@ export default function SignupPage() {
               name="business_name"
               placeholder="e.g. John Doe Photography"
               autoComplete="organization"
+              defaultValue={state?.values?.business_name ?? ""}
             />
           </div>
           <div>
@@ -41,6 +42,7 @@ export default function SignupPage() {
               type="email"
               required
               autoComplete="email"
+              defaultValue={state?.values?.email ?? ""}
             />
           </div>
           <div>

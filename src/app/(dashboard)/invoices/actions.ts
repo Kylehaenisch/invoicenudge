@@ -6,7 +6,20 @@ import { createClient } from "@/lib/supabase/server";
 import { getAccessLevel } from "@/lib/subscription";
 import { sendInvoiceCreatedNotification } from "@/lib/send-invoice-notification";
 
-export type InvoiceFormState = { error?: string };
+export type InvoiceFormState = {
+  error?: string;
+  // Echoed back so the form can re-fill itself after a failed submit — this
+  // form has the most fields of any in the app, so losing them all over one
+  // bad date would be the worst case of the "retype everything" problem.
+  values?: {
+    client_id?: string;
+    amount?: string;
+    description?: string;
+    issue_date?: string;
+    due_date?: string;
+    status?: string;
+  };
+};
 
 export async function createInvoice(
   _prevState: InvoiceFormState,
@@ -18,18 +31,26 @@ export async function createInvoice(
   const issueDate = String(formData.get("issue_date") ?? "");
   const dueDate = String(formData.get("due_date") ?? "");
   const status = String(formData.get("status") ?? "draft");
+  const values = {
+    client_id: clientId,
+    amount: amountDollars,
+    description,
+    issue_date: issueDate,
+    due_date: dueDate,
+    status,
+  };
 
   const amount = Number(amountDollars);
-  if (!clientId) return { error: "Choose a client." };
+  if (!clientId) return { error: "Choose a client.", values };
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "Enter an amount greater than $0." };
+    return { error: "Enter an amount greater than $0.", values };
   }
-  if (!dueDate) return { error: "Due date is required." };
+  if (!dueDate) return { error: "Due date is required.", values };
   if (issueDate && dueDate < issueDate) {
-    return { error: "Due date can't be before the issue date." };
+    return { error: "Due date can't be before the issue date.", values };
   }
   if (!["draft", "sent"].includes(status)) {
-    return { error: "Invalid status." };
+    return { error: "Invalid status.", values };
   }
 
   const supabase = await createClient();
@@ -44,7 +65,10 @@ export async function createInvoice(
     .eq("id", user.id)
     .single();
   if (profile && getAccessLevel(profile) !== "full") {
-    return { error: "Your subscription isn't active — reactivate billing to create invoices." };
+    return {
+      error: "Your subscription isn't active — reactivate billing to create invoices.",
+      values,
+    };
   }
 
   const { data: invoice, error } = await supabase
@@ -61,7 +85,9 @@ export async function createInvoice(
     .select("id")
     .single();
 
-  if (error || !invoice) return { error: error?.message ?? "Could not create invoice." };
+  if (error || !invoice) {
+    return { error: error?.message ?? "Could not create invoice.", values };
+  }
 
   if (status === "sent") {
     await sendInvoiceCreatedNotification(invoice.id, user.id);

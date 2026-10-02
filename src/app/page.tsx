@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 const FEATURES = [
   {
     title: "Invoices that chase themselves",
-    body: "Four reminders go out automatically — before the due date, on it, and twice after — so you never have to send an awkward follow-up email again.",
+    body: "The moment you mark an invoice sent, your client gets notified — then four more reminders go out automatically — before the due date, on it, and twice after — so you never have to send an awkward follow-up email again.",
   },
   {
     title: "Your words, not a template's",

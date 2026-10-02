@@ -29,7 +29,12 @@ export function InvoiceForm({
     <form action={formAction} className="space-y-5">
       <div>
         <Label htmlFor="client_id">Client</Label>
-        <Select id="client_id" name="client_id" required defaultValue="">
+        <Select
+          id="client_id"
+          name="client_id"
+          required
+          defaultValue={state.values?.client_id ?? ""}
+        >
           <option value="" disabled>
             Select a client
           </option>
@@ -53,11 +58,12 @@ export function InvoiceForm({
             min="0.01"
             required
             placeholder="1250.00"
+            defaultValue={state.values?.amount ?? ""}
           />
         </div>
         <div>
           <Label htmlFor="status">Status</Label>
-          <Select id="status" name="status" defaultValue="sent">
+          <Select id="status" name="status" defaultValue={state.values?.status ?? "sent"}>
             <option value="draft">Draft (no reminders yet)</option>
             <option value="sent">Sent (reminders start)</option>
           </Select>
@@ -71,6 +77,7 @@ export function InvoiceForm({
           name="description"
           rows={3}
           placeholder="Wedding photography — full day coverage"
+          defaultValue={state.values?.description ?? ""}
         />
       </div>
 
@@ -81,7 +88,7 @@ export function InvoiceForm({
             id="issue_date"
             name="issue_date"
             type="date"
-            defaultValue={defaultIssueDate}
+            defaultValue={state.values?.issue_date ?? defaultIssueDate}
             required
           />
         </div>
@@ -91,7 +98,7 @@ export function InvoiceForm({
             id="due_date"
             name="due_date"
             type="date"
-            defaultValue={defaultDueDate}
+            defaultValue={state.values?.due_date ?? defaultDueDate}
             required
           />
         </div>
