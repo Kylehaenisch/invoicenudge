@@ -17,6 +17,20 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Supabase reports a used/expired link by redirecting here with an
+    // `error` param (query string or fragment). Checked first because the
+    // getSession() fallback below can't tell a recovery session from an
+    // ordinary logged-in one — without this, someone already signed in
+    // (e.g. right after a successful reset) would see the password form for
+    // a dead link instead of the "invalid or expired" message.
+    const linkError =
+      new URLSearchParams(window.location.search).get("error") ??
+      new URLSearchParams(window.location.hash.slice(1)).get("error");
+    if (linkError) {
+      setStatus("invalid");
+      return;
+    }
+
     const supabase = createClient();
 
     // Clicking the email link lands here with the session encoded in the
