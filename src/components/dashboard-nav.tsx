@@ -16,7 +16,11 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 overflow-x-auto">
+    // Wraps instead of scrolling horizontally — at narrow widths a hidden
+    // overflow-x-auto has no visible hint that "Billing" exists off-screen,
+    // and there are only 5 short links, so a second row is simpler than
+    // teaching a scroll affordance.
+    <nav className="flex flex-wrap gap-1">
       {LINKS.map((link) => {
         const active =
           pathname === link.href ||

@@ -10,8 +10,13 @@ import { getStripeClient } from "@/lib/stripe";
  * users' *clients* paying them.
  *
  * A plain GET so it can be reached with a simple link/redirect (no form
- * needed) — it always creates a fresh Checkout Session, so it's safe to
- * hit repeatedly (e.g. after an abandoned checkout).
+ * needed). It's safe to hit repeatedly *while there's nothing active to
+ * protect* (e.g. retrying after an abandoned checkout) — but if a live
+ * Stripe subscription already exists for this user, creating another one
+ * here would double-bill them, since the webhook only ever remembers the
+ * most recent `stripe_subscription_id` and the first one would keep billing
+ * in Stripe without the app knowing. Those cases go to the billing page
+ * (manage/reactivate via the Customer Portal) instead.
  */
 export async function GET() {
   const supabase = await createClient();
@@ -25,6 +30,14 @@ export async function GET() {
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (
+    profile?.subscription_status === "trialing" ||
+    profile?.subscription_status === "active" ||
+    profile?.subscription_status === "past_due"
+  ) {
+    redirect("/settings/billing");
+  }
 
   const stripe = getStripeClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;

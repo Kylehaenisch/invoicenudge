@@ -27,15 +27,25 @@ export function ClientForm() {
     <form ref={formRef} action={formAction} className="grid gap-4 sm:grid-cols-3">
       <div>
         <Label htmlFor="name">Client name</Label>
-        <Input id="name" name="name" required />
+        <Input id="name" name="name" required defaultValue={state.values?.name ?? ""} />
       </div>
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          required
+          defaultValue={state.values?.email ?? ""}
+        />
       </div>
       <div>
         <Label htmlFor="business_name">Business name (optional)</Label>
-        <Input id="business_name" name="business_name" />
+        <Input
+          id="business_name"
+          name="business_name"
+          defaultValue={state.values?.business_name ?? ""}
+        />
       </div>
       {state.error && (
         <p className="text-sm text-rose-600 sm:col-span-3">{state.error}</p>

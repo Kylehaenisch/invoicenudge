@@ -66,6 +66,13 @@ export async function POST(request: NextRequest) {
             stripe_subscription_id: subscription.id,
             subscription_status: toStoredStatus(subscription.status),
             current_period_end: getCurrentPeriodEnd(subscription),
+            // This checkout always requests a fresh 14-day trial (see
+            // app/api/subscribe/checkout/route.ts), including when someone
+            // cancels and resubscribes later. Without resetting this here,
+            // a resubscriber's flag would still be set from their *first*
+            // trial, and the send-trial-ending cron's `is(..., null)` filter
+            // would skip them for good — they'd never get the new reminder.
+            trial_ending_notified_at: null,
           })
           .eq("id", userId);
       }

@@ -2,7 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/clients", "/invoices", "/settings"];
-const AUTH_PREFIXES = ["/login", "/signup"];
+// /reset-password is deliberately excluded — it's reached via an emailed
+// link while the visitor isn't logged in yet in the normal cookie sense
+// (that page establishes its own temporary recovery session client-side),
+// so it must stay reachable either way rather than bouncing to /dashboard
+// or /login.
+const AUTH_PREFIXES = ["/login", "/signup", "/forgot-password"];
 
 /**
  * Refreshes the Supabase session cookie on every request (so it never
